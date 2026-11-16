@@ -26,9 +26,14 @@
 | TRAP-19 | 规则优先级 | 直接转换或覆盖产生误判 | 按数据字典处理并保留来源证据 | `app/modules/m3_model/rules.py` | `tests/test_model.py::test_order_independent` |
 | TRAP-23 | 区间端点 | 直接转换或覆盖产生误判 | 按数据字典处理并保留来源证据 | `app/modules/m3_model/rules.py` | `tests/test_model.py::test_half_open_boundary` |
 | TRAP-26 | 陈旧版本 | 直接转换或覆盖产生误判 | 按数据字典处理并保留来源证据 | `app/store.py` | `tests/test_batches.py::test_sample_review_cas` |
+| TRAP-30 | 补正划回已注销序号 | 直接按新版重放使注销复活 | 注销墙并集拦截，正式可用=名义持仓−墙 | `app/modules/m3_model/rules.py` | `tests/test_correction.py::test_retirement_never_revived` |
+| TRAP-31 | 换版失败丢旧版 | 覆盖式更新导致记录/证据丢失 | 回退名义账并恢复旧版，SUPERSEDED留痕 | `app/modules/m3_model/rules.py` | `tests/test_correction.py::test_failed_correction_keeps_old_version` |
+| TRAP-32 | 同补正重试重复占用/注销 | 重复行二次落账 | 业务指纹去重+注销墙并集幂等 | `app/modules/m3_model/rules.py` | `tests/test_correction.py::test_retry_does_not_double_hold` |
+| TRAP-33 | 补正缩小注销范围 | 以新版小覆盖替换旧版大事实 | 墙只增不减，正式持仓按旧版大事实扣减 | `app/modules/m3_model/rules.py` | `tests/test_correction.py::test_shrinking_retirement_cannot_revive_serials` |
+| TRAP-34 | 备注差异误判冲突 | 含note的整行指纹把重试判CONFLICT | 指纹排除note列，仅比对业务字段 | `app/modules/m3_model/rules.py` | `tests/test_correction.py::test_fingerprint_ignores_note` |
 
 ## 对账规则
-签发=可用+已划出+已注销，持有人区间不重叠
+逐批号区间：签发=可用+已注销（已划拨为可用池中外部持有人占用，含入可用；已注销为注销墙∩签发）；全局签发=正式可用+墙注销，持有人正式区间不重叠、不碰注销墙。
 
 ## 已知不覆盖
 不覆盖外部登记系统同步、跨批次证书合并；演示范围为单个上传文件完整重放。

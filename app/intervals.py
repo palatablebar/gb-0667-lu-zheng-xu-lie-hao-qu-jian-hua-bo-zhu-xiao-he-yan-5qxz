@@ -19,3 +19,16 @@ def subtract(intervals,lo,hi):
         if a<lo:out.append((a,min(b,lo)))
         if b>hi:out.append((max(a,hi),b))
     return normalize(out)
+
+def intersect(intervals,lo,hi):
+    return normalize([(max(a,lo),min(b,hi)) for a,b in normalize(intervals) if a<hi and lo<b])
+
+def intersect_all(left,right):
+    out=[]
+    for a,b in normalize(left):out.extend(intersect(right,a,b))
+    return normalize(out)
+
+def difference(intervals,cutters):
+    out=list(normalize(intervals))
+    for lo,hi in normalize(cutters):out=subtract(out,lo,hi)
+    return out
